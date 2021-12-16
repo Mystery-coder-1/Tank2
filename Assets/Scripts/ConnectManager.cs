@@ -4,12 +4,14 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
+using Tanks;
 
 public class ConnectManager : MonoBehaviourPunCallbacks
 {
     public static ConnectManager instance;
     public static GameObject localPlayer;
     string gameVersion = "1";
+    private GameObject defaultSpawnPoint;
 
     private void Awake()
     {
@@ -22,6 +24,10 @@ public class ConnectManager : MonoBehaviourPunCallbacks
         PhotonNetwork.AutomaticallySyncScene = true;
         DontDestroyOnLoad(gameObject);
         instance = this;
+
+        defaultSpawnPoint = new GameObject("Defalut SpawnPoint");
+        defaultSpawnPoint.transform.position = new Vector3(0, 0, 0);
+        defaultSpawnPoint.transform.SetParent(transform, false);
     }
 
     private void Start()
@@ -83,7 +89,32 @@ public class ConnectManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        localPlayer = PhotonNetwork.Instantiate("TankPlayer", new Vector3(0, 0, 0), Quaternion.identity, 0);
+        var spawnPoint = GetRandomSpawnPoint();
+
+        localPlayer = PhotonNetwork.Instantiate("TankPlayer", spawnPoint.position, spawnPoint.rotation, 0);
         Debug.Log("Player Instance ID: " + localPlayer.GetInstanceID());
     }
+
+    public static List<GameObject> GetAllObjectsOfTypeInScene<T>()
+    {
+        var objectsInScene = new List<GameObject>();
+        foreach (var go in (GameObject[])Resources.FindObjectsOfTypeAll(typeof(GameObject)))
+        {
+            if (go.hideFlags == HideFlags.NotEditable ||
+                go.hideFlags == HideFlags.HideAndDontSave)
+                continue;
+            if (go.GetComponent<T>() != null)
+                objectsInScene.Add(go);
+        }
+        return objectsInScene;
+    }
+
+    private Transform GetRandomSpawnPoint()
+    {
+        var spawnPoints = GetAllObjectsOfTypeInScene<SpawnPoint>();
+        return spawnPoints.Count == 0
+        ? defaultSpawnPoint.transform
+        : spawnPoints[Random.Range(0, spawnPoints.Count)].transform;
+    }
+
 }
