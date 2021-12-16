@@ -11,6 +11,7 @@ namespace Complete
         public AudioClip m_EngineIdling;            // Audio to play when the tank isn't moving.
         public AudioClip m_EngineDriving;           // Audio to play when the tank is moving.
 		public float m_PitchRange = 0.2f;           // The amount by which the pitch of the engine noises can vary.
+        public Transform mTurrent;
 
         private string m_MovementAxisName;          // The name of the input axis for moving forward and back.
         private string m_TurnAxisName;              // The name of the input axis for turning.
@@ -19,6 +20,8 @@ namespace Complete
         private float m_TurnInputValue;             // The current value of the turn input.
         private float m_OriginalPitch;              // The pitch of the audio source at the start of the scene.
         private ParticleSystem[] m_particleSystems; // References to all the particles systems used by the Tanks
+        private float mTurnTurrentValue;
+        private string mTurnTurrentName;
 
         private void Awake ()
         {
@@ -64,6 +67,7 @@ namespace Complete
             // The axes names are based on player number.
             m_MovementAxisName = "Vertical";
             m_TurnAxisName = "Horizontal";
+            mTurnTurrentName = "HoriTurrent";
 
             // Store the original pitch of the audio source.
             m_OriginalPitch = m_MovementAudio.pitch;
@@ -75,6 +79,7 @@ namespace Complete
             // Store the value of both input axes.
             m_MovementInputValue = Input.GetAxis (m_MovementAxisName);
             m_TurnInputValue = Input.GetAxis (m_TurnAxisName);
+            mTurnTurrentValue = Input.GetAxis(mTurnTurrentName);
 
             EngineAudio ();
         }
@@ -113,6 +118,7 @@ namespace Complete
             // Adjust the rigidbodies position and orientation in FixedUpdate.
             Move ();
             Turn ();
+            TurnTurrent();
         }
 
 
@@ -136,6 +142,18 @@ namespace Complete
 
             // Apply this rotation to the rigidbody's rotation.
             m_Rigidbody.MoveRotation (m_Rigidbody.rotation * turnRotation);
+        }
+
+        private void TurnTurrent()
+        {
+            float turn = mTurnTurrentValue * m_TurnSpeed * Time.deltaTime;
+
+
+            Quaternion turnRotation = Quaternion.Euler(0f, turn, 0f);
+
+            Vector3 eulerAngle = turnRotation.eulerAngles;
+
+            mTurrent.Rotate(eulerAngle, Space.Self);
         }
     }
 }
