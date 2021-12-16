@@ -1,22 +1,27 @@
 using Photon.Pun;
 using UnityEngine;
 
-public class TankPlayer : MonoBehaviourPunCallbacks
+namespace Tanks
 {
-    private Complete.TankMovement mMovement;
-
-    private Complete.TankShooting mShooting;
-
-    private void Awake()
+    public class TankPlayer : MonoBehaviourPunCallbacks
     {
-        mMovement = GetComponent<Complete.TankMovement>();
-        mShooting = GetComponent<Complete.TankShooting>();
+        private Complete.TankMovement mMovement;
 
-        if(!photonView.IsMine)
+        private Complete.TankShooting mShooting;
+
+        private void Awake()
         {
-            mMovement.enabled = false;
-            mShooting.enabled = false;
-            enabled = false;
+            mMovement = GetComponent<Complete.TankMovement>();
+            mShooting = GetComponent<Complete.TankShooting>();
+
+            if (!photonView.IsMine)
+            {
+                Debug.Log("true");
+                mMovement.enabled = false;
+                mShooting.enabled = false;
+                enabled = false;
+            }
         }
     }
+
 }
