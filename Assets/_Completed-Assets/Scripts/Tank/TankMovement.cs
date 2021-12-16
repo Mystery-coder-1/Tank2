@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
+using Photon.Pun;
+using Tanks;
 
 namespace Complete
 {
-    public class TankMovement : MonoBehaviour
+    public class TankMovement : MonoBehaviourPunCallbacks
     {
         public int m_PlayerNumber = 1;              // Used to identify which tank belongs to which player.  This is set by this tank's manager.
         public float m_Speed = 12f;                 // How fast the tank moves forward and back.
@@ -11,7 +13,8 @@ namespace Complete
         public AudioClip m_EngineIdling;            // Audio to play when the tank isn't moving.
         public AudioClip m_EngineDriving;           // Audio to play when the tank is moving.
 		public float m_PitchRange = 0.2f;           // The amount by which the pitch of the engine noises can vary.
-        public Transform mTurrent;
+        private Transform mTurrent;
+        
 
         private string m_MovementAxisName;          // The name of the input axis for moving forward and back.
         private string m_TurnAxisName;              // The name of the input axis for turning.
@@ -26,11 +29,13 @@ namespace Complete
         private void Awake ()
         {
             m_Rigidbody = GetComponent<Rigidbody> ();
+            mTurrent = transform.FindAnyChild<Transform>("TankTurret");
         }
 
 
-        private void OnEnable ()
+        public override void OnEnable ()
         {
+            base.OnEnable();
             // When the tank is turned on, make sure it's not kinematic.
             m_Rigidbody.isKinematic = false;
 
@@ -49,8 +54,10 @@ namespace Complete
         }
 
 
-        private void OnDisable ()
+        public override void OnDisable ()
         {
+            base.OnDisable();
+
             // When the tank is turned off, set it to kinematic so it stops moving.
             m_Rigidbody.isKinematic = true;
 
@@ -147,13 +154,20 @@ namespace Complete
         private void TurnTurrent()
         {
             float turn = mTurnTurrentValue * m_TurnSpeed * Time.deltaTime;
-
-
+            
             Quaternion turnRotation = Quaternion.Euler(0f, turn, 0f);
 
             Vector3 eulerAngle = turnRotation.eulerAngles;
 
             mTurrent.Rotate(eulerAngle, Space.Self);
+
+            photonView.RPC("Turrent", RpcTarget.Others, mTurrent.rotation);
+        }
+
+        [PunRPC]
+        private void Turrent(Quaternion qua)
+        {
+            mTurrent.rotation = qua;
         }
     }
 }
