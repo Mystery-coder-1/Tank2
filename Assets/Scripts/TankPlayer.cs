@@ -16,7 +16,6 @@ namespace Tanks
 
             if (!photonView.IsMine)
             {
-                Debug.Log("true");
                 mMovement.enabled = false;
                 mShooting.enabled = false;
                 enabled = false;

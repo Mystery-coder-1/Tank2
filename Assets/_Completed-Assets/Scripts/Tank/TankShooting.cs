@@ -92,8 +92,7 @@ namespace Complete
             // Create an instance of the shell and store a reference to it's rigidbody.
             Rigidbody shellInstance =
                 Instantiate (m_Shell, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
-
-            photonView.RPC("FireOther", RpcTarget.Others, m_FireTransform.position);
+         
 
             // Set the shell's velocity to the launch force in the fire position's forward direction.
             shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward; 
@@ -104,17 +103,19 @@ namespace Complete
 
             // Reset the launch force.  This is a precaution in case of missing button events.
             m_CurrentLaunchForce = m_MinLaunchForce;
+
+            photonView.RPC("FireOther", RpcTarget.Others, m_FireTransform.position, shellInstance.velocity);
         }
 
         [PunRPC]
-        private void FireOther(Vector3 pos)
+        private void FireOther(Vector3 pos, Vector3 velocity)
         {
             m_Fired = true;
 
             Rigidbody shellInstance =
                 Instantiate(m_Shell, pos, m_FireTransform.rotation) as Rigidbody;
 
-            shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;
+            shellInstance.velocity = velocity;
 
             m_CurrentLaunchForce = m_MinLaunchForce;
         }
